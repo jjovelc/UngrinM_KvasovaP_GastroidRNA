@@ -42,6 +42,7 @@ dds <- DESeqDataSetFromMatrix(countData = data_matrix, colData = metadata, desig
 
 # Perform variance stabilizing transformation for PCA
 vsd <- vst(dds, blind = FALSE)
+rld <- rlog(dds, blind = FALSE)
 
 # Generate PCA data
 pcaData <- plotPCA(vsd, intgroup = "group", returnData = TRUE)
@@ -202,63 +203,96 @@ group_means <- group_means[,-1]
 cor_matrix <- cor(t(group_means), method="pearson")
 
 # Create heatmap with correlation coefficients displayed
-pheatmap(cor_matrix, 
-         main = "",
-         display_numbers = TRUE,
-         number_format = "%.3f",
-         number_color = "white",
-         fontsize_number = 12,
-         cellwidth = 60,
-         cellheight = 60,
-         color = colorRampPalette(rev(brewer.pal(11, "Spectral")))(100))
+# Open a PDF file (set desired width/height in inches)
+pdf("heatmap_full-transc_corr-coeff.pdf", width = 10, height = 10)
+
+# Correct way — print() ensures it gets rendered in the PDF
+print(
+  pheatmap(
+    cor_matrix, 
+    main = "",
+    display_numbers = TRUE,
+    number_format = "%.3f",
+    number_color = "white",
+    fontsize_number = 12,
+    cellwidth = 60,
+    cellheight = 60,
+    color = colorRampPalette(rev(brewer.pal(11, "Spectral")))(100)
+  )
+)
+
+dev.off()
 
 ###############################################
 # UPSET PLOT - REPLACES VENN DIAGRAM
 ###############################################
 
-# Get gene lists from significant results
-genes_2D <- rownames(sig_primary_vs_2D)
-genes_3Dsm <- rownames(sig_primary_vs_3Dsm)
-genes_3Dpp <- rownames(sig_primary_vs_3Dpp)
+## 1) Split each contrast into UP and DOWN gene sets
+up_2D    <- rownames(sig_primary_vs_2D[ sig_primary_vs_2D$log2FoldChange > 0, , drop = FALSE ])
+down_2D  <- rownames(sig_primary_vs_2D[ sig_primary_vs_2D$log2FoldChange < 0, , drop = FALSE ])
 
-# Create a list of all unique genes
-all_genes <- unique(c(genes_2D, genes_3Dsm, genes_3Dpp))
+up_3Dsm   <- rownames(sig_primary_vs_3Dsm[ sig_primary_vs_3Dsm$log2FoldChange > 0, , drop = FALSE ])
+down_3Dsm <- rownames(sig_primary_vs_3Dsm[ sig_primary_vs_3Dsm$log2FoldChange < 0, , drop = FALSE ])
 
-# Create binary matrix for UpSet plot
-upset_data <- data.frame(
-  gene = all_genes,
-  Primary_vs_2D = as.integer(all_genes %in% genes_2D),
-  Primary_vs_3DsmallMol = as.integer(all_genes %in% genes_3Dsm),
-  Primary_vs_3DpurProt = as.integer(all_genes %in% genes_3Dpp)
-)
+up_3Dpp   <- rownames(sig_primary_vs_3Dpp[ sig_primary_vs_3Dpp$log2FoldChange > 0, , drop = FALSE ])
+down_3Dpp <- rownames(sig_primary_vs_3Dpp[ sig_primary_vs_3Dpp$log2FoldChange < 0, , drop = FALSE ])
 
-# Generate UpSet plot
-png("DE_upset_plot.png", width = 800, height = 600)
-upset(upset_data, 
+## 2) Helper to build binary matrix and save an UpSet plot using UpSetR (back to working version)
+make_upset <- function(file, sets_list, main_col, w = 10, h = 8) {
+  all_genes <- unique(unlist(sets_list))
+  df <- data.frame(
+    Primary_vs_2D          = as.integer(all_genes %in% sets_list[[1]]),
+    Primary_vs_3DsmallMol  = as.integer(all_genes %in% sets_list[[2]]),
+    Primary_vs_3DpurProt   = as.integer(all_genes %in% sets_list[[3]]),
+    row.names = all_genes
+  )
+  
+  # Save as PNG
+  png(file, width = w, height = h, units = "in", res = 300)
+  print(
+    UpSetR::upset(
+      df,
       sets = c("Primary_vs_2D", "Primary_vs_3DsmallMol", "Primary_vs_3DpurProt"),
       order.by = "freq",
       keep.order = TRUE,
-      main.bar.color = "steelblue",
-      sets.bar.color = "darkgreen",
-      text.scale = c(1.5, 1.3, 1.3, 1.3, 1.5, 1.3),
-      point.size = 3.5,
-      line.size = 1)
-dev.off()
+      main.bar.color = main_col,   # intersection bars (red or green)
+      sets.bar.color = "darkorange",     # set-size bars (dark blue)
+      text.scale = c(4, 4, 1.5, 2, 2, 3),
+      point.size = 8,
+      line.size = 1.2,
+      matrix.color = "#144d78"        # matrix dots and lines (blue)
+    )
+  )
+  dev.off()
+}
+
+## 3) UPREGULATED (red intersection bars, navy set bars, blue matrix)
+make_upset(
+  file = "UpSet_upregulated.png",
+  sets_list = list(up_2D, up_3Dsm, up_3Dpp),
+  main_col = "firebrick"
+)
+
+## 4) DOWNREGULATED (green intersection bars, navy set bars, blue matrix)
+make_upset(
+  file = "UpSet_downregulated.png",
+  sets_list = list(down_2D, down_3Dsm, down_3Dpp),
+  main_col = "forestgreen"
+)
 
 # Print overlap statistics
 cat("\n=== Gene Overlap Statistics ===\n")
-cat("Genes in 2D only:", sum(upset_data$Primary_vs_2D == 1 & 
-                               upset_data$Primary_vs_3DsmallMol == 0 & 
-                               upset_data$Primary_vs_3DpurProt == 0), "\n")
-cat("Genes in 3D small mol only:", sum(upset_data$Primary_vs_2D == 0 & 
-                                         upset_data$Primary_vs_3DsmallMol == 1 & 
-                                         upset_data$Primary_vs_3DpurProt == 0), "\n")
-cat("Genes in 3D pur prot only:", sum(upset_data$Primary_vs_2D == 0 & 
-                                        upset_data$Primary_vs_3DsmallMol == 0 & 
-                                        upset_data$Primary_vs_3DpurProt == 1), "\n")
-cat("Genes shared by all three:", sum(upset_data$Primary_vs_2D == 1 & 
-                                        upset_data$Primary_vs_3DsmallMol == 1 & 
-                                        upset_data$Primary_vs_3DpurProt == 1), "\n")
+cat("\nUPREGULATED genes:\n")
+cat("  In 2D only:", length(setdiff(setdiff(up_2D, up_3Dsm), up_3Dpp)), "\n")
+cat("  In 3D small mol only:", length(setdiff(setdiff(up_3Dsm, up_2D), up_3Dpp)), "\n")
+cat("  In 3D pur prot only:", length(setdiff(setdiff(up_3Dpp, up_2D), up_3Dsm)), "\n")
+cat("  Shared by all three:", length(Reduce(intersect, list(up_2D, up_3Dsm, up_3Dpp))), "\n")
+
+cat("\nDOWNREGULATED genes:\n")
+cat("  In 2D only:", length(setdiff(setdiff(down_2D, down_3Dsm), down_3Dpp)), "\n")
+cat("  In 3D small mol only:", length(setdiff(setdiff(down_3Dsm, down_2D), down_3Dpp)), "\n")
+cat("  In 3D pur prot only:", length(setdiff(setdiff(down_3Dpp, down_2D), down_3Dsm)), "\n")
+cat("  Shared by all three:", length(Reduce(intersect, list(down_2D, down_3Dsm, down_3Dpp))), "\n")
 
 ###############################################
 
@@ -335,7 +369,6 @@ text(umap_res$layout, labels=metadata$label, pos=3)
 importance <- varImp(rf_model)
 plot(importance, top=30)
 
-library(dplyr)
 similarity_scores <- pred_df %>%
   group_by(group) %>%
   summarise(
@@ -408,7 +441,7 @@ p + geom_text(
   aes(label = gene, y = -1.5),
   hjust = 1, size = 3
 )
-
+print(p)
 ##############################################
 #           ENDS MACHINE LEARNING            #
 ##############################################
@@ -458,32 +491,50 @@ getFirstMatch <- function(records, transcripts) {
 }
 
 makeVolcanoPlot <- function(df, vp_file, title_text){
-  keyvals <- ifelse(
-    df$log2FoldChange < -1, 'forestgreen',
-    ifelse(df$log2FoldChange > 1, 'firebrick1',
-           'dodgerblue1'))
+  # Create a simple volcano plot using ggplot2
+  library(ggplot2)
   
-  keyvals[is.na(keyvals)] <- 'black'
-  names(keyvals)[keyvals == 'firebrick1'] <- 'High'
-  names(keyvals)[keyvals == 'dodgerblue1'] <- 'small FC'
-  names(keyvals)[keyvals == 'forestgreen'] <- 'Low'
+  # Prepare data
+  volcano_data <- data.frame(
+    log2FC = df$log2FoldChange,
+    neg_log10_padj = -log10(df$padj),
+    significant = df$padj < 0.05 & abs(df$log2FoldChange) >= 1
+  )
   
-  evp <- EnhancedVolcano(df,
-                         lab = df$external_gene_name,
-                         x = 'log2FoldChange',
-                         y = 'padj',
-                         pCutoff = 0.05,
-                         FCcutoff = 1,
-                         colCustom = keyvals,
-                         title = title_text,
-                         subtitle = NULL,
-                         colAlpha = 0.85,
-                         shape = 20,
-                         pointSize = 2,
-                         labSize = 3)
+  # Remove infinite values
+  volcano_data$neg_log10_padj[is.infinite(volcano_data$neg_log10_padj)] <- 10
   
+  # Create color vector based on corrected logic
+  volcano_data$color <- ifelse(
+    df$padj >= 0.05, 'Not significant',
+    ifelse(df$padj < 0.05 & abs(df$log2FoldChange) < 1, 'Low FC',
+           ifelse(df$log2FoldChange > 1, 'Upregulated', 'Downregulated'))
+  )
+  
+  # Create the plot
+  p <- ggplot(volcano_data, aes(x = log2FC, y = neg_log10_padj, color = color)) +
+    geom_point(alpha = 0.6, size = 2) +
+    scale_color_manual(values = c('Upregulated' = 'firebrick1', 
+                                 'Downregulated' = 'forestgreen',
+                                 'Low FC' = 'dodgerblue1',
+                                 'Not significant' = 'gray')) +
+    labs(title = title_text,
+         x = 'Log2 Fold Change',
+         y = '-Log10 Adjusted P-value',
+         color = 'Significance') +
+    theme_bw() +
+    theme(legend.position = 'bottom',
+          title = element_text(size = 24),
+          axis.title = element_text(size = 20),
+          axis.text = element_text(size = 16),
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 16)) +
+    geom_vline(xintercept = c(-1, 1), linetype = 'dashed', alpha = 0.5) +
+    geom_hline(yintercept = -log10(0.05), linetype = 'dashed', alpha = 0.5)
+  
+  # Save plot
   png(vp_file, width = 800, height = 600)
-  print(evp)
+  print(p)
   dev.off()
 }
 
@@ -537,10 +588,12 @@ for (res_name in names(results_list)) {
   sig_result <- results_list[[res_name]]$sig_result
   annotation_df <- results_list[[res_name]]$annotation
   
-  # Combine full results with annotations for volcano plot
-  annotated_results <- cbind(as.data.frame(result), annotation_df)
+  # Create volcano plot using full results (without annotations for now)
+  vp_file <- paste(prefix, "volcanoPlot.png", sep = '_')
+  makeVolcanoPlot(as.data.frame(result), vp_file, 
+                  title_text = paste("Volcano Plot:", gsub("_", " ", prefix)))
   
-  # Combine significant results with annotations
+  # Combine significant results with annotations (these should have matching row counts)
   annotated_sig_results <- cbind(as.data.frame(sig_result), annotation_df)
   annotated_sig_results <- annotated_sig_results[order(-annotated_sig_results$log2FoldChange), ]
   annotated_sig_results <- cbind(transcript=rownames(annotated_sig_results), 
@@ -549,11 +602,6 @@ for (res_name in names(results_list)) {
   # Save annotated significant results
   file_name <- paste(prefix, "q0.05_FC1_annotated.tsv", sep = '_')
   write.table(annotated_sig_results, file_name, quote = F, sep = '\t', row.names = F)
-  
-  # Create volcano plot
-  vp_file <- paste(prefix, "volcanoPlot.png", sep = '_')
-  makeVolcanoPlot(annotated_results, vp_file, 
-                  title_text = paste("Volcano Plot:", gsub("_", " ", prefix)))
   
   cat(paste("Number of significant transcripts deregulated:", 
             nrow(annotated_sig_results), "\n"))
