@@ -16,6 +16,19 @@ library(biomaRt)
 library(EnhancedVolcano)
 library(vegan)
 library(UpSetR)
+library(clusterProfiler)
+library(DOSE)
+library(enrichplot)
+
+# Check if org.Mm.eg.db is available, if not, install it
+if (!require(org.Mm.eg.db, quietly = TRUE)) {
+  cat("Installing org.Mm.eg.db package...\n")
+  if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+  }
+  BiocManager::install("org.Mm.eg.db")
+  library(org.Mm.eg.db)
+}
 
 rm(list = ls())
 
@@ -578,6 +591,228 @@ results_list <- list(
                              annotation = annotation_df3)
 )
 
+###############################################
+#           CLUSTERPROFILER FUNCTIONS        #
+###############################################
+
+# Helper function to perform GO enrichment analysis
+performGOEnrichment <- function(annotated_results, prefix, direction) {
+  cat(paste("\n=== GO Enrichment Analysis:", direction, "genes for", prefix, "===\n"))
+  
+  # Extract Entrez IDs for the direction
+  if (direction == "up") {
+    direction_data <- subset(annotated_results, log2FoldChange > 0)
+  } else {
+    direction_data <- subset(annotated_results, log2FoldChange < 0)
+  }
+  
+  # Get Entrez IDs, remove NA and duplicates
+  entrez_ids <- direction_data$entrezgene_id
+  entrez_ids_clean <- entrez_ids[!is.na(entrez_ids)]
+  entrez_ids_unique <- entrez_ids_clean[!duplicated(entrez_ids_clean)]
+  
+  cat(paste("Number of genes for enrichment:", length(entrez_ids_unique), "\n"))
+  
+  if (length(entrez_ids_unique) < 10) {
+    cat("Too few genes for meaningful enrichment analysis\n")
+    return(NULL)
+  }
+  
+  # Check if org.Mm.eg.db is available
+  if (!exists("org.Mm.eg.db") || !requireNamespace("org.Mm.eg.db", quietly = TRUE)) {
+    cat("org.Mm.eg.db not available. Please install it manually:\n")
+    cat("if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager')\n")
+    cat("BiocManager::install('org.Mm.eg.db')\n")
+    cat("Skipping GO enrichment analysis...\n")
+    return(NULL)
+  }
+  
+  # Perform GO enrichment
+  ego <- clusterProfiler::enrichGO(
+    entrez_ids_unique,
+    org.Mm.eg.db,
+    keyType = "ENTREZID",
+    ont = "BP",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH",
+    qvalueCutoff = 0.1,
+    minGSSize = 10,
+    maxGSSize = 500,
+    readable = FALSE,
+    pool = FALSE
+  )
+  
+  # Simplify GO terms
+  ego_simplified <- clusterProfiler::simplify(ego, cutoff = 0.7, by = "p.adjust", select_fun = min)
+  
+  # Save results
+  if (!is.null(ego_simplified) && nrow(ego_simplified@result) > 0) {
+    results_file <- paste(prefix, direction, "GO_enrichment.tsv", sep = "_")
+    write.table(ego_simplified@result, results_file, quote = F, row.names = F, sep = "\t")
+    
+    # Create dotplot
+    dotplot_file <- paste(prefix, direction, "GO_dotplot.pdf", sep = "_")
+    pdf(dotplot_file, width = 12, height = 8)
+    print(dotplot(ego_simplified, showCategory = 15, font.size = 10))
+    dev.off()
+    
+    cat(paste("Saved GO results:", results_file, "\n"))
+    cat(paste("Saved GO dotplot:", dotplot_file, "\n"))
+    cat(paste("Number of enriched GO terms:", nrow(ego_simplified@result), "\n"))
+  } else {
+    cat("No significant GO terms found\n")
+  }
+  
+  return(ego_simplified)
+}
+
+# Helper function to perform KEGG pathway analysis
+performKEGGEnrichment <- function(annotated_results, prefix, direction) {
+  cat(paste("\n=== KEGG Pathway Analysis:", direction, "genes for", prefix, "===\n"))
+  
+  # Extract data for the direction
+  if (direction == "up") {
+    direction_data <- subset(annotated_results, log2FoldChange > 0)
+  } else {
+    direction_data <- subset(annotated_results, log2FoldChange < 0)
+  }
+  
+  # Get Entrez IDs, remove NA and duplicates
+  entrez_ids <- direction_data$entrezgene_id
+  entrez_ids_clean <- entrez_ids[!is.na(entrez_ids)]
+  entrez_ids_unique <- entrez_ids_clean[!duplicated(entrez_ids_clean)]
+  
+  cat(paste("Number of genes for KEGG analysis:", length(entrez_ids_unique), "\n"))
+  
+  if (length(entrez_ids_unique) < 10) {
+    cat("Too few genes for meaningful KEGG analysis\n")
+    return(NULL)
+  }
+  
+  # Perform KEGG enrichment
+  kk <- clusterProfiler::enrichKEGG(
+    entrez_ids_unique,
+    organism = "mmu",  # Mouse
+    keyType = "ncbi-geneid",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH",
+    qvalueCutoff = 0.1,
+    minGSSize = 10,
+    maxGSSize = 500
+  )
+  
+  # Save results
+  if (!is.null(kk) && nrow(kk@result) > 0) {
+    results_file <- paste(prefix, direction, "KEGG_enrichment.tsv", sep = "_")
+    write.table(kk@result, results_file, quote = F, row.names = F, sep = "\t")
+    
+    # Create dotplot
+    dotplot_file <- paste(prefix, direction, "KEGG_dotplot.pdf", sep = "_")
+    pdf(dotplot_file, width = 12, height = 8)
+    print(dotplot(kk, showCategory = 15, font.size = 10))
+    dev.off()
+    
+    cat(paste("Saved KEGG results:", results_file, "\n"))
+    cat(paste("Saved KEGG dotplot:", dotplot_file, "\n"))
+    cat(paste("Number of enriched KEGG pathways:", nrow(kk@result), "\n"))
+  } else {
+    cat("No significant KEGG pathways found\n")
+  }
+  
+  return(kk)
+}
+
+# Helper function to perform GSEA analysis
+performGSEA <- function(annotated_results, prefix) {
+  cat(paste("\n=== GSEA Analysis for", prefix, "===\n"))
+  
+  # Prepare gene list with log2FoldChange and Entrez IDs
+  gene_list <- annotated_results$log2FoldChange
+  names(gene_list) <- annotated_results$entrezgene_id
+  
+  # Remove NA values and duplicates
+  gene_list_clean <- gene_list[!is.na(names(gene_list))]
+  gene_list_unique <- gene_list_clean[!duplicated(names(gene_list_clean))]
+  
+  # Sort by fold change
+  gene_list_sorted <- sort(gene_list_unique, decreasing = TRUE)
+  
+  # Filter for genes with |log2FC| > 1
+  gene_list_filtered <- gene_list_sorted[abs(gene_list_sorted) > 1]
+  
+  cat(paste("Number of genes for GSEA:", length(gene_list_filtered), "\n"))
+  
+  if (length(gene_list_filtered) < 50) {
+    cat("Too few genes for meaningful GSEA analysis\n")
+    return(NULL)
+  }
+  
+  # Check if org.Mm.eg.db is available for GSEA
+  if (!exists("org.Mm.eg.db") || !requireNamespace("org.Mm.eg.db", quietly = TRUE)) {
+    cat("org.Mm.eg.db not available for GSEA GO analysis. Skipping...\n")
+    gsea_go <- NULL
+  } else {
+    # Perform GSEA GO
+    gsea_go <- clusterProfiler::gseGO(
+      geneList = gene_list_filtered,
+      ont = "BP",
+      keyType = "ENTREZID",
+      nPerm = 10000,
+      minGSSize = 10,
+      maxGSSize = 500,
+      pvalueCutoff = 0.05,
+      verbose = FALSE,
+      OrgDb = org.Mm.eg.db,
+      pAdjustMethod = "BH"
+    )
+  }
+  
+  # Perform GSEA KEGG
+  gsea_kegg <- clusterProfiler::gseKEGG(
+    geneList = gene_list_filtered,
+    organism = "mmu",
+    keyType = "ncbi-geneid",
+    nPerm = 10000,
+    minGSSize = 10,
+    maxGSSize = 500,
+    pvalueCutoff = 0.05,
+    verbose = FALSE,
+    pAdjustMethod = "BH"
+  )
+  
+  # Save GSEA GO results
+  if (!is.null(gsea_go) && nrow(gsea_go@result) > 0) {
+    results_file <- paste(prefix, "GSEA_GO_results.tsv", sep = "_")
+    write.table(gsea_go@result, results_file, quote = F, row.names = F, sep = "\t")
+    
+    # Create dotplot
+    dotplot_file <- paste(prefix, "GSEA_GO_dotplot.pdf", sep = "_")
+    pdf(dotplot_file, width = 12, height = 8)
+    print(dotplot(gsea_go, showCategory = 15, split = ".sign") + facet_grid(.~.sign))
+    dev.off()
+    
+    cat(paste("Saved GSEA GO results:", results_file, "\n"))
+    cat(paste("Saved GSEA GO dotplot:", dotplot_file, "\n"))
+  }
+  
+  # Save GSEA KEGG results
+  if (!is.null(gsea_kegg) && nrow(gsea_kegg@result) > 0) {
+    results_file <- paste(prefix, "GSEA_KEGG_results.tsv", sep = "_")
+    write.table(gsea_kegg@result, results_file, quote = F, row.names = F, sep = "\t")
+    
+    # Create dotplot
+    dotplot_file <- paste(prefix, "GSEA_KEGG_dotplot.pdf", sep = "_")
+    pdf(dotplot_file, width = 12, height = 8)
+    print(dotplot(gsea_kegg, showCategory = 15, split = ".sign") + facet_grid(.~.sign))
+    dev.off()
+    
+    cat(paste("Saved GSEA KEGG results:", results_file, "\n"))
+    cat(paste("Saved GSEA KEGG dotplot:", dotplot_file, "\n"))
+  }
+  
+  return(list(GSEA_GO = gsea_go, GSEA_KEGG = gsea_kegg))
+}
+
 # Process each comparison
 cat("\n=== Processing and saving annotated results ===\n")
 for (res_name in names(results_list)) {
@@ -607,6 +842,27 @@ for (res_name in names(results_list)) {
             nrow(annotated_sig_results), "\n"))
   cat(paste("Saved:", file_name, "\n"))
   cat(paste("Saved:", vp_file, "\n\n"))
+  
+  # Perform clusterProfiler analyses on annotated significant results
+  if (nrow(annotated_sig_results) > 10) {
+    # GO enrichment for upregulated genes
+    performGOEnrichment(annotated_sig_results, prefix, "up")
+    
+    # GO enrichment for downregulated genes  
+    performGOEnrichment(annotated_sig_results, prefix, "down")
+    
+    # KEGG pathway analysis for upregulated genes
+    performKEGGEnrichment(annotated_sig_results, prefix, "up")
+    
+    # KEGG pathway analysis for downregulated genes
+    performKEGGEnrichment(annotated_sig_results, prefix, "down")
+    
+    # GSEA analysis (uses all significant genes)
+    performGSEA(annotated_sig_results, prefix)
+  } else {
+    cat(paste("Too few significant genes for clusterProfiler analysis:", 
+              nrow(annotated_sig_results), "\n"))
+  }
 }
 
 cat("\n=== Analysis Complete ===\n")
