@@ -1,6 +1,6 @@
 ## Optimizing Gastric Organoid Culture Conditions: A Transcriptomic Comparison of 2D vs 3D Systems and Synthetic vs Animal-Derived Growth Factors for Maintaining Primary Cell Fidelity
 
-## Project Description
+### Project Description
 
 This study addresses a critical challenge in organoid research: identifying culture conditions that best preserve the biological authenticity of primary gastric cells while minimizing costs. Mouse gastric epithelial cells are cultured under four distinct conditions:
 
