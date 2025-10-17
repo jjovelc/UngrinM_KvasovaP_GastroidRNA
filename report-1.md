@@ -37,4 +37,50 @@ Because the quality of libraries is very high (typical of 50 cycles libraries), 
   <img src="results/images/qualityScores_linePlot.png" width="400" alt="Quality Scores Line Plot">
 </div>
 
+#### Quantification
+Quantification was performed with Salmon, against the mouse transcriptome GRCm39, with the following command:
+```bash
+  salmon quant \
+    -i $DIR/$TRANSCRIPTOME_IDX \
+    -l A \
+    -1 $READ1 \
+    -2 $READ2 \
+    -o $OUTPUT_DIR \
+    --validateMappings \
+    --gcBias \
+    --seqBias \
+    -p 24
+```
+
+##### Distance analysis at the full transcriptome level
+
+The transcriptome is very sensitive to environmental alterations. In order to assess which culture (2D_smallMol, 3D_smallMol, or 3D_purProt) transcriptome is closer to the transcriptome of primary cells, a series of analyses were conducted.
+
+###### Principal Component Analysis
+
+<div align="center">
+  <img src="results/images/PCA_by_group.pdf" width="400" alt="PCA Plot">
+</div>
+
+
+
+
+#### Differential expression analysis
+The following metadata table was used for differential expression analysis and downstream analysis.
+
+Table 2. Metadata
+| sampleID   | group            | label  |
+|------------|------------------|--------|
+| F1Stomach  | 01_primary       | F1pri  |
+| F1StMono   | 02_2D_smallMol   | F12D   |
+| F1StHOIH   | 04_3D_purProt    | F13Dpp |
+| F1StNSC    | 03_3D_smallMol   | F13Dsm |
+| F2Stomach  | 01_primary       | F2pri  |
+| F2StMono   | 02_2D_smallMol   | F22D   |
+| F2StHOIH   | 04_3D_purProt    | F23Dpp |
+| F2StNSC    | 03_3D_smallMol   | F23Dsm |
+| F3Stomach  | 01_primary       | F3pri  |
+| F3StMono   | 02_2D_smallMol   | F32D   |
+| F3StHOIH   | 04_3D_purProt    | F33Dpp |
+| F3StNSC    | 03_3D_smallMol   | F33Dsm |
 
