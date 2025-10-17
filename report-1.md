@@ -59,7 +59,7 @@ The transcriptome is very sensitive to environmental alterations. In order to as
 ###### Principal Component Analysis
 
 <div align="center">
-  <img src="results/images/PCA_by_group.pdf" width="400" alt="PCA Plot">
+  <img src="results/images/PCA_by_group.png" width="400" alt="PCA Plot">
 </div>
 
 
