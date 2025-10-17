@@ -1,4 +1,4 @@
-# Optimizing Gastric Organoid Culture Conditions: A Transcriptomic Comparison of 2D vs 3D Systems and Synthetic vs Animal-Derived Growth Factors for Maintaining Primary Cell Fidelity
+## Optimizing Gastric Organoid Culture Conditions: A Transcriptomic Comparison of 2D vs 3D Systems and Synthetic vs Animal-Derived Growth Factors for Maintaining Primary Cell Fidelity
 
 ## Project Description
 
@@ -17,9 +17,9 @@ Using bulk RNA sequencing, this project aims to comprehensively compare the tran
 
 The findings will provide evidence-based recommendations for establishing gastric organoid culture protocols that balance biological authenticity, experimental reproducibility, and economic feasibility—a critical consideration for scaling research and potential therapeutic applications.
 
-## Working Plan
+### Working Plan
 
-### Phase 1: Data Quality Control and Preprocessing
+#### Phase 1: Data Quality Control and Preprocessing
 
 **Objectives:**
 - Assess sequencing quality and depth
@@ -30,7 +30,7 @@ The findings will provide evidence-based recommendations for establishing gastri
 - QC report with sequencing metrics
 - Normalized expression data ready for analysis
 
-### Phase 2: Global Transcriptomic Analysis
+#### Phase 2: Global Transcriptomic Analysis
 
 **Objectives:**
 - Compare overall transcriptomic similarity to primary cells
@@ -42,7 +42,7 @@ The findings will provide evidence-based recommendations for establishing gastri
 - Correlation heatmaps
 - Differential expression results for all comparisons
 
-### Phase 3: Cell Type Deconvolution Analysis
+#### Phase 3: Cell Type Deconvolution Analysis
 
 **Objectives:**
 - Estimate cell type composition in each culture condition
@@ -54,7 +54,7 @@ The findings will provide evidence-based recommendations for establishing gastri
 - Cell type marker expression profiles
 - Analysis of gastric cell lineages (pit, parietal, chief, enteroendocrine cells, etc.)
 
-### Phase 4: Growth Factor Comparison
+#### Phase 4: Growth Factor Comparison
 
 **Objectives:**
 - Directly compare 3D cultures with animal-derived vs synthetic growth factors
@@ -66,7 +66,7 @@ The findings will provide evidence-based recommendations for establishing gastri
 - Pathway enrichment analysis
 - Recommendations on growth factor selection
 
-### Phase 5: Integration and Reporting
+#### Phase 5: Integration and Reporting
 
 **Objectives:**
 - Synthesize findings across all analyses
