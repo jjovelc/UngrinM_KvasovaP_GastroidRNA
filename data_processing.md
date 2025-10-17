@@ -29,3 +29,7 @@
   conda activate r_3.6.3
   Rscript create_dot_plots.R
 ```
+
+### 5. Conduct differential expression and gene ontology analyses
+
+Script extract_salmon-quant_results.sh produces tables `allSamples_counts.tsv` and `allSamples_tpms.tsv`. The former one was used for postprocessing with script DESeq2.R.
