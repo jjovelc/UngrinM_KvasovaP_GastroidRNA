@@ -1,7 +1,7 @@
 ## Results, report # 1: Quantification, DE and GO analysis
 
 Date: October 17, 2025
-### Descrition of libraries
+### Description of libraries
 Table 1. Samples, number of reads per library and group.
 
 | sample    | reads    | group         |
@@ -88,7 +88,7 @@ Another way to compare the similarity of full transcriptomes is to calculate the
 **Figure 3.** Heatmap showing Pearson correlation coefficients between the expression of all transcripts in pairwise comparisons (data subjected to a regularized logarithmic transformation).
 
 <div align="center">
-  <img src="results/images/heatmap_full-transc_corr-coeff.png" width="250" alt="Heatmap Pearson correlation Plot">
+  <img src="results/images/heatmap_full-transc_corr-coeff.png" width="350" alt="Heatmap Pearson correlation Plot">
 </div>
 
 📝 When using the whole transcriptome, what we see is that the three experimental cultures transcriptome is very different from the one in primary cells, and much closer among them. Namely, in PC units (useful only as relative distances), we see that the 2D culture centroid is positioned ~80 units away from the primary cells centroid, while both 3D groups centroids locate ~75 units. Also, the distance among the two 3D cultures is approximately half of the distance between them and the 2D culture.
@@ -133,3 +133,5 @@ When transcript expression in primary cells was compared against group 2D_smallM
 <div align="center">
   <img src="results/images/primary_vs_2D_volcanoPlot.png" width="350" alt="Volcano plot primary vs 2D_smallMol">
 </div>
+
+
