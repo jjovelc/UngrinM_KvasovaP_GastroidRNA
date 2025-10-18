@@ -73,9 +73,9 @@ Table 2. Distances between centroids
 | group          |  01_primary | 02_2D_smallMol | 03_3D_smallMol | 04_3D_purProt |
 |----------------|--------------|----------------|---------------|---------------|
 | 01_primary     |      0.00    |      80.09     |     75.28     |    75.53      |
-| 02_2D_smallMol |  **80.09**   |       0.00     |     41.52     |    46.46      |
-| 03_3D_smallMol |  **75.28**   |    **41.52**   |      0.00     |    23.76      |
-| 04_3D_purProt  |  **75.53**   |    **46.46**   |   **23.76**   |     0.00      |
+| 02_2D_smallMol | <u>80.09</u> |       0.00     |     41.52     |    46.46      |
+| 03_3D_smallMol | <u>75.28</u> |   <u>41.52</u> |      0.00     |    23.76      |
+| 04_3D_purProt  | <u>75.53</u> |   <u>46.46</u> |  <u>23.76</u> |     0.00      |
 
 **Figure 3.** Heatmap of distances between group centroids.
 
