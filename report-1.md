@@ -34,7 +34,7 @@ Table 1. Samples, number of reads per library and group.
 #### Quality control
 Because the quality of libraries is very high (typical of 50 cycles libraries), no quality trimming was required.
 
-**Figure 1.** Quality scores (Q) for all libraries, including end1 and end2.<br> 
+__Figure 1.__ Quality scores (Q) for all libraries, including end1 and end2.<br> 
 <div align="center">
   <img src="results/images/qualityScores_linePlot.png" width="400" alt="Quality Scores Line Plot">
 </div>
@@ -58,17 +58,30 @@ Quantification was performed with Salmon, against the mouse transcriptome GRCm39
 
 The transcriptome is very sensitive to environmental alterations. In order to assess which culture (2D_smallMol, 3D_smallMol, or 3D_purProt) transcriptome is closer to the transcriptome of primary cells, a series of analyses were conducted.
 
-###### Principal Component Analysis
+__Principal Component Analysis__
 
 Euclidean distances of vst data were used to derived principal components. Component 1 and 2 are presented in the following figure. Centroids for each cluster are included.
 
-*Figure 2.* PCA for all samples using Euclidean distances and including the centroid for each cluster. 
+__Figure 2.__ PCA for all samples using Euclidean distances and including the centroid for each cluster. 
 
 <div align="center">
-  <img src="results/images/PCA_with_centroids_and_distances.png" width="400" alt="PCA Plot">
+  <img src="results/images/PCA_with_centroids_and_distances.png" width="400" alt="PCA with centroids Plot">
 </div>
 
+Table 2. Distances between centroids
 
+| group          |  01_primary | 02_2D_smallMol | 03_3D_smallMol | 04_3D_purProt |
+|----------------|--------------|----------------|---------------|---------------|
+| 01_primary     |      0.00    |      80.09     |     75.28     |    75.53      |
+| 02_2D_smallMol |  __80.09__   |       0.00     |     41.52     |    46.46      |
+| 03_3D_smallMol |  __75.28__   |    __41.52__   |      0.00     |    23.76      |
+| 04_3D_purProt  |  __75.53__   |    __46.46__   |   __23.76__   |     0.00      |
+
+__Figure 3.__ Heatmap of distances between group centroids.
+
+<div align="center">
+  <img src="results/images/centroid_distances_heatmap.png" width="250" alt="Heatmap centroid distances Plot">
+</div>
 
 
 #### Differential expression analysis
