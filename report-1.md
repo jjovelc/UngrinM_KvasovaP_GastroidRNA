@@ -126,7 +126,7 @@ Results for each comparison are briefly describe hereafter:
 
 **primary vs 2D_smallMol**
 
-When transcript expression in primary cells was compared against group 2D_smallMol, 19,045 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 8,833 transcripts were found upregulated (with expression values higher than primary cells), and 10,212 transcripts were found downregulated (with expression lower than the primary cells).
+When transcript expression in primary cells was compared against group 2D_smallMol, 19045 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 8833 transcripts were found upregulated (with expression values higher than primary cells), and 10212 transcripts were found downregulated (with expression lower than the primary cells).
 
 **Figure 4.** Volcano plot showing deregulated transcripts between primary and 2D_smallMol cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts. 
 
@@ -134,4 +134,37 @@ When transcript expression in primary cells was compared against group 2D_smallM
   <img src="results/images/primary_vs_2D_volcanoPlot.png" width="350" alt="Volcano plot primary vs 2D_smallMol">
 </div>
 
+**primary vs 3D_purProt**
 
+When transcript expression in primary cells was compared against group 3D_purProt, 18998 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 9681 transcripts were found upregulated (with expression values higher than primary cells), and 9317 transcripts were found downregulated (with expression lower than the primary cells).
+
+**Figure 5.** Volcano plot showing deregulated transcripts between primary and 3D_purProt cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts.
+
+<div align="center">
+  <img src="results/images/primary_vs_3Dpp_volcanoPlot.png" width="350" alt="Volcano plot primary vs 3D_purProt">
+</div>
+
+**primary vs 3D_smallMol**
+
+When transcript expression in primary cells was compared against group 3D_smallMol, 18239 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 8838 transcripts were found upregulated (with expression values higher than primary cells), and 9401 transcripts were found downregulated (with expression lower than the primary cells).
+
+**Figure 6.** Volcano plot showing deregulated transcripts between primary and 3D_smallMol cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts.
+
+<div align="center">
+  <img src="results/images/primary_vs_3Dsm_volcanoPlot.png" width="350" alt="Volcano plot primary vs 3D_smallMol">
+</div>
+
+Again, the number of DE transcripts was slightly larger for the comparison primary vs 2D_smallMol cells (19045), although very close to the number of DE transcript for comparison primary vs 3D_purProt (18998). Comparison primary vs 3D_smallMol cells had a lower number of DE transcript (18239).
+
+From this results alone, we conclude that the 3D_smallMol culture contain a transcriptome with the small number of DE transcripts when compared to primary cells.
+
+Another interesting question here is how those DE transcripts in each comparison overlap. This can be depicted in a UpSet plot.
+
+**Figure 7.** UpSet plot showing the number of DE transcripts unique to each of the comparison or overlaping in two or more comparisons. Upper panel with vertical bars in red represent upregulated transcripts while lower panel, with green vertical bars corresponds to downregulated transcripts. 
+
+<div align="center">
+  <img src="results/images/UpSet_upregulated.png" width="350" alt="UpSet plot for upregulated transcripts">
+</div>
+<div align="center">
+  <img src="results/images/UpSet_downregulated.png" width="350" alt="UpSet plot for downregulated transcripts">
+</div>
