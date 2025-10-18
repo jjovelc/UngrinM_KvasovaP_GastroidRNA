@@ -19,10 +19,11 @@ Table 1. Samples, number of reads per library and group.
 | F2StNSC   | 33031281 | 3D_smallMol   |
 | F3StNSC   | 39212559 | 3D_smallMol   |
 
-primary_cells : Mice gastric primary cells cultured with purified stomach groth factors proteins.
-2D_smallMol   : Mice gratric cells cultured in Petri dishes supplemented with small molecules growth factors.
-3D_purProt    : Organoid culture supplemented with purified stomach groth factors proteins.
-3D_smallMol   : Organoid culture supplemented with small molecules growth factors.
+Groups:
+  primary_cells : Mice gastric primary cells cultured with purified stomach groth factors proteins.<br>
+  2D_smallMol   : Mice gratric cells cultured in Petri dishes supplemented with small molecules growth factors.<br>
+  3D_purProt    : Organoid culture supplemented with purified stomach groth factors proteins.<br>
+  3D_smallMol   : Organoid culture supplemented with small molecules growth factors.<br>
 
 ### Content
   1. Quality control
