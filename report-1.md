@@ -19,7 +19,7 @@ Table 1. Samples, number of reads per library and group.
 | F2StNSC   | 33031281 | 3D_smallMol   |
 | F3StNSC   | 39212559 | 3D_smallMol   |
 
-Groups:
+**Groups:**<br>
   primary_cells : Mice gastric primary cells cultured with purified stomach groth factors proteins.<br>
   2D_smallMol   : Mice gratric cells cultured in Petri dishes supplemented with small molecules growth factors.<br>
   3D_purProt    : Organoid culture supplemented with purified stomach groth factors proteins.<br>
@@ -34,6 +34,7 @@ Groups:
 #### Quality control
 Because the quality of libraries is very high (typical of 50 cycles libraries), no quality trimming was required.
 
+**Figure 1.** Quality scores (Q) for all libraries, including end1 and end2.<br> 
 <div align="center">
   <img src="results/images/qualityScores_linePlot.png" width="400" alt="Quality Scores Line Plot">
 </div>
@@ -59,14 +60,19 @@ The transcriptome is very sensitive to environmental alterations. In order to as
 
 ###### Principal Component Analysis
 
+Euclidean distances of vst data were used to derived principal components. Component 1 and 2 are presented in the following figure. Centroids for each cluster are included.
+
+*Figure 2.* PCA for all samples using Euclidean distances and including the centroid for each cluster. 
+
 <div align="center">
-  <img src="results/images/PCA_by_group.png" width="400" alt="PCA Plot">
+  <img src="results/images/PCA_with_centroids_and_distances.png" width="400" alt="PCA Plot">
 </div>
 
 
 
 
 #### Differential expression analysis
+
 The following metadata table was used for differential expression analysis and downstream analysis.
 
 Table 2. Metadata
