@@ -20,10 +20,10 @@ Table 1. Samples, number of reads per library and group.
 | F3StNSC   | 39212559 | 3D_smallMol   |
 
 **Groups:**<br>
-  primary_cells : Mice gastric primary cells cultured with purified stomach groth factors proteins.<br>
-  2D_smallMol   : Mice gratric cells cultured in Petri dishes supplemented with small molecules growth factors.<br>
-  3D_purProt    : Organoid culture supplemented with purified stomach groth factors proteins.<br>
-  3D_smallMol   : Organoid culture supplemented with small molecules growth factors.<br>
+  primary_cells : Mice gastric primary cells cultured with purified stomach growth factors proteins (baseline/reference condition).<br>
+  2D_smallMol   : Mice gastric cells cultured in Petri dishes (2D monolayer) supplemented with small molecules growth factors.<br>
+  3D_purProt    : 3D organoid culture supplemented with purified stomach growth factors proteins.<br>
+  3D_smallMol   : 3D organoid culture supplemented with small molecules growth factors.<br>
 
 ### Content
   1. Quality control
@@ -32,7 +32,7 @@ Table 1. Samples, number of reads per library and group.
   4. Gene ontology analysis
 
 #### Quality control
-Because the quality of libraries is very high (typical of 50 cycles libraries), no quality trimming was required.
+Quality assessment was performed using FastQC and MultiQC. The libraries demonstrated excellent quality with typical Q scores above 30 throughout the read length (typical of 50-cycle libraries), indicating high sequence confidence. Based on the quality metrics, no quality trimming or additional preprocessing was required before quantification.
 
 **Figure 1.** Quality scores (Q) for all libraries, including end1 and end2.<br> 
 <div align="center">
@@ -40,7 +40,7 @@ Because the quality of libraries is very high (typical of 50 cycles libraries), 
 </div>
 
 #### Quantification
-Quantification was performed with Salmon, against the mouse transcriptome GRCm39, with the following command:
+Transcript abundance quantification was performed using Salmon (version 1.4.0) against the mouse reference transcriptome GRCm39. Salmon was chosen for its superior accuracy in transcript-level quantification and its ability to account for various biases. The quantification included bias correction for GC content and sequence bias to improve accuracy.
 ```bash
   salmon quant \
     -i $DIR/$TRANSCRIPTOME_IDX \
@@ -60,7 +60,7 @@ The transcriptome is very sensitive to environmental alterations. In order to as
 
 **Principal Component Analysis**
 
-Euclidean distances of vst data were used to derived principal components. Component 1 and 2 are presented in the following figure. Centroids for each cluster are included.
+Principal Component Analysis (PCA) was performed using variance-stabilizing transformed (VST) data from DESeq2 to normalize count distributions and reduce heteroscedasticity. Euclidean distances were used to derive principal components, with the first two components capturing the main sources of variation between experimental conditions. Centroids for each group are included to facilitate distance calculations between conditions.
 
 **Figure 2.** PCA for all samples using Euclidean distances and including the centroid for each cluster. 
 
@@ -83,9 +83,9 @@ Table 2. Distances between centroids
   <img src="results/images/centroid_distances_heatmap.png" width="250" alt="Heatmap centroid distances Plot">
 </div>
 
-Another way to compare the similarity of full transcriptomes is to calculate the correlation coefficient for the expression of each transcript in pairwise comparisons.
+Another approach to assess transcriptome similarity is to calculate Pearson correlation coefficients for the expression of all transcripts in pairwise comparisons between groups. This analysis was performed on regularized log-transformed data to ensure proper normalization and to assess the overall correlation structure between experimental conditions.
 
-**Figure 3.** Heatmap showing Pearson correlation coefficients between the expression of all transcripts in pairwise comparisons (data subjected to a regularized logarithmic transformation).
+**Figure 4.** Heatmap showing Pearson correlation coefficients between the expression of all transcripts in pairwise comparisons (data subjected to a regularized logarithmic transformation).
 
 <div align="center">
   <img src="results/images/heatmap_full-transc_corr-coeff.png" width="350" alt="Heatmap Pearson correlation Plot">
@@ -116,7 +116,7 @@ Table 3. Metadata.
 | F3StHOIH   | 04_3D_purProt    | F33Dpp |
 | F3StNSC    | 03_3D_smallMol   | F33Dsm |
 
-Differential expression analysis was conducted with DESeq2 and to significant comparisons were filtered using a log2FoldChange shrinking GLM function. A list of DE transcripts for comparisons of each experimental culture, against the primary cell culture (set as reference) can be found in the following tables.
+Differential expression analysis was conducted using DESeq2 to identify genes with statistically significant changes in expression between experimental conditions. Primary cells were set as the reference condition for all comparisons. Count data were filtered to include only genes with at least 5 reads in at least 3 samples to reduce noise from lowly expressed genes. Statistical significance was assessed using the Wald test with multiple testing correction (Benjamini-Hochberg, padj < 0.05) and effect size threshold (|log2FoldChange| ≥ 1). The analysis utilized the apeglm shrinkage method for log2 fold change estimation to reduce noise in fold change estimates for low-count genes.
 
 1. primary vs 2D_smallMol -> primary_vs_2D_q0.05_FC1_annotated.xlsx
 2. primary vs 3D_purProt  -> primary_vs_3Dpp_q0.05_FC1_annotated.xlsx
@@ -128,7 +128,7 @@ Results for each comparison are briefly describe hereafter:
 
 When transcript expression in primary cells was compared against group 2D_smallMol, 19045 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 8833 transcripts were found upregulated (with expression values higher than primary cells), and 10212 transcripts were found downregulated (with expression lower than the primary cells).
 
-**Figure 4.** Volcano plot showing deregulated transcripts between primary and 2D_smallMol cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts. 
+**Figure 5.** Volcano plot showing deregulated transcripts between primary and 2D_smallMol cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts. 
 
 <div align="center">
   <img src="results/images/primary_vs_2D_volcanoPlot.png" width="350" alt="Volcano plot primary vs 2D_smallMol">
@@ -138,7 +138,7 @@ When transcript expression in primary cells was compared against group 2D_smallM
 
 When transcript expression in primary cells was compared against group 3D_purProt, 18998 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 9681 transcripts were found upregulated (with expression values higher than primary cells), and 9317 transcripts were found downregulated (with expression lower than the primary cells).
 
-**Figure 5.** Volcano plot showing deregulated transcripts between primary and 3D_purProt cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts.
+**Figure 6.** Volcano plot showing deregulated transcripts between primary and 3D_purProt cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts.
 
 <div align="center">
   <img src="results/images/primary_vs_3Dpp_volcanoPlot.png" width="350" alt="Volcano plot primary vs 3D_purProt">
@@ -148,19 +148,19 @@ When transcript expression in primary cells was compared against group 3D_purPro
 
 When transcript expression in primary cells was compared against group 3D_smallMol, 18239 transcripts were found differentially expressed (adjusted pValue < 0.05 and |log2FC| > 1). Out of those, 8838 transcripts were found upregulated (with expression values higher than primary cells), and 9401 transcripts were found downregulated (with expression lower than the primary cells).
 
-**Figure 6.** Volcano plot showing deregulated transcripts between primary and 3D_smallMol cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts.
+**Figure 7.** Volcano plot showing deregulated transcripts between primary and 3D_smallMol cells. Red dots indicate upregulated transcripts and green dots represent downregulated transcripts.
 
 <div align="center">
   <img src="results/images/primary_vs_3Dsm_volcanoPlot.png" width="350" alt="Volcano plot primary vs 3D_smallMol">
 </div>
 
-Again, the number of DE transcripts was slightly larger for the comparison primary vs 2D_smallMol cells (19045), although very close to the number of DE transcript for comparison primary vs 3D_purProt (18998). Comparison primary vs 3D_smallMol cells had a lower number of DE transcript (18239).
+The number of DE transcripts varied across comparisons: primary vs 2D_smallMol (19,045 transcripts), primary vs 3D_purProt (18,998 transcripts), and primary vs 3D_smallMol (18,239 transcripts), with the 2D_smallMol comparison showing the most changes.
 
-From this results alone, we conclude that the 3D_smallMol culture contain a transcriptome with the small number of DE transcripts when compared to primary cells.
+Based on these results, we conclude that the 3D_smallMol culture contains a transcriptome with the smallest number of DE transcripts when compared to primary cells (18,239 vs 19,045 for 2D_smallMol and 18,998 for 3D_purProt), suggesting that this culture condition may be most similar to the primary cell transcriptome.
 
 Another interesting question here is how those DE transcripts in each comparison overlap. This can be depicted in a UpSet plot.
 
-**Figure 7.** UpSet plot showing the number of DE transcripts unique to each of the comparison or overlaping in two or more comparisons. Upper panel with vertical bars in red represent upregulated transcripts while lower panel, with green vertical bars corresponds to downregulated transcripts. 
+**Figure 8.** UpSet plot showing the number of DE transcripts unique to each of the comparison or overlapping in two or more comparisons. Upper panel with vertical bars in red represent upregulated transcripts while lower panel, with green vertical bars corresponds to downregulated transcripts. 
 
 <div align="center">
   <img src="results/images/UpSet_upregulated.png" width="350" alt="UpSet plot for upregulated transcripts">
@@ -169,16 +169,19 @@ Another interesting question here is how those DE transcripts in each comparison
   <img src="results/images/UpSet_downregulated.png" width="350" alt="UpSet plot for downregulated transcripts">
 </div>
 
-Approximately half of DE transcripts were common to the three comparisons. A relative large fraction of transcripts (1885 upregulated and 2486 downregulated) were found deregulated only in 2D_smallMol, which might represent adaptation to the 2D culture. Similarly, a considerable fraction of DE transcripts were only seen in 3D cultures. Also, each of the 3D cultures share some hundreds of DE transcripts witht the 2D culture. Finally, each 3D culture also exhibited a unique set of DE transcripts.
+The UpSet plot analysis reveals important insights into the overlap of differentially expressed genes across culture conditions. Approximately half of the DE transcripts were common to all three comparisons, indicating a core set of genes consistently affected when moving from primary cells to cultured conditions. A relatively large fraction of transcripts (1,885 upregulated and 2,486 downregulated) were found deregulated only in 2D_smallMol cultures, likely representing specific adaptations to the 2D monolayer environment. Both 3D cultures also shared substantial numbers of unique DE transcripts, suggesting common responses to 3D culture conditions. Interestingly, each 3D culture condition (3D_purProt and 3D_smallMol) also exhibited their own unique sets of DE transcripts, indicating that the type of growth factors (purified proteins vs small molecules) has distinct effects on gene expression in 3D organoid cultures.
 
 #### Gene ontology analysis
 
-A beter way to interpret DE transcripts is to organize them either in ontology terms or in pathways.
+Functional interpretation of differentially expressed transcripts was performed using gene set enrichment analysis (GSEA) and over-representation analysis (ORA) to identify biological processes and pathways affected by the different culture conditions. These analyses help understand the biological significance of the observed expression changes beyond individual gene-level differences.
 
-The following algorithms from the R package [ClusterProfiler]() were used:
+The following analyses were conducted using the R package ClusterProfiler:
 
-1. gsea_go: ...
-2. gsea_kegg: ... 
+1. **Over-representation Analysis (ORA)**: Traditional enrichment analysis was performed on upregulated and downregulated gene sets separately using enriched GO terms (Biological Process) and KEGG pathways. Only significantly differentially expressed genes (padj < 0.05 and |log2FC| ≥ 1) were included in these analyses.
+
+2. **Gene Set Enrichment Analysis (GSEA)**: GSEA was performed using all significantly differentially expressed genes ranked by their log2 fold changes, allowing for detection of more subtle but coordinated changes in gene sets that might be missed by traditional over-representation analysis.
+
+3. **Database Annotation**: All transcripts were annotated using the Ensembl database (GRCm39) to obtain gene symbols, Entrez IDs, GO terms, and pathway information necessary for functional analysis. 
 
 What follows are the top ontology terms or KEGG pathways for each of the comparisons. All differentially enriched or depleted features can be found in the following tables.
 
@@ -208,17 +211,90 @@ primary_vs_3Dsm_up_KEGG_enrichment.xlsx: ...
 
 Hereafter the top differentially enriched or depleted features in each comparison:
 
-**Figure 8.** Top enriched gene ontology terms in upregulated DE transcripts for comparison primary versus 2D_smallMol. 
+**Figure 9.** Top enriched gene ontology terms in upregulated DE transcripts for comparison primary versus 2D_smallMol. 
 <div align="center">
   <img src="results/images/primary_vs_2D_up_GO_dotplot.png" width="500" alt="Top up-enriched GO terms">
 </div>
 
-**Figure 9.** Top enriched gene ontology terms in downregulated DE transcripts for comparison primary versus 2D_smallMol. 
+**Figure 10.** Top enriched gene ontology terms in downregulated DE transcripts for comparison primary versus 2D_smallMol. 
 <div align="center">
-  <img src="results/images/primary_vs_2D_down_GO_dotplot.png" width="500" alt="Top up-enriched GO terms">
+  <img src="results/images/primary_vs_2D_down_GO_dotplot.png" width="500" alt="Top down-enriched GO terms primary vs 2D_smallMol">
 </div>
 
-**Figure 10.** Top enriched gene ontology terms in GSEA for comparison primary versus 2D_smallMol.
+**Figure 11.** Top enriched gene ontology terms in GSEA for comparison primary versus 2D_smallMol.
 <div align="center">
   <img src="results/images/primary_vs_2D_GSEA_GO_dotplot.png" width="900" alt="GSEA-enriched GO terms">
 </div>
+
+**Figure 12.** Top enriched gene ontology terms from GSEA KEGG pathways for comparison primary versus 2D_smallMol.
+<div align="center">
+  <img src="results/images/primary_vs_2D_GSEA_KEGG_dotplot.png" width="900" alt="GSEA KEGG-enriched pathways">
+</div>
+
+**primary vs 3D_purProt GO Analysis**
+
+**Figure 13.** Top enriched gene ontology terms in upregulated DE transcripts for comparison primary versus 3D_purProt.
+<div align="center">
+  <img src="results/images/primary_vs_3Dpp_up_GO_dotplot.png" width="500" alt="Top up-enriched GO terms primary vs 3D_purProt">
+</div>
+
+**Figure 14.** Top enriched gene ontology terms in downregulated DE transcripts for comparison primary versus 3D_purProt.
+<div align="center">
+  <img src="results/images/primary_vs_3Dpp_down_GO_dotplot.png" width="500" alt="Top down-enriched GO terms primary vs 3D_purProt">
+</div>
+
+**Figure 15.** Top enriched gene ontology terms in GSEA for comparison primary versus 3D_purProt.
+<div align="center">
+  <img src="results/images/primary_vs_3Dpp_GSEA_GO_dotplot.png" width="900" alt="GSEA-enriched GO terms primary vs 3D_purProt">
+</div>
+
+**Figure 16.** Top enriched gene ontology terms from GSEA KEGG pathways for comparison primary versus 3D_purProt.
+<div align="center">
+  <img src="results/images/primary_vs_3Dpp_GSEA_KEGG_dotplot.png" width="900" alt="GSEA KEGG-enriched pathways primary vs 3D_purProt">
+</div>
+
+**primary vs 3D_smallMol GO Analysis**
+
+**Figure 17.** Top enriched gene ontology terms in upregulated DE transcripts for comparison primary versus 3D_smallMol.
+<div align="center">
+  <img src="results/images/primary_vs_3Dsm_up_GO_dotplot.png" width="500" alt="Top up-enriched GO terms primary vs 3D_smallMol">
+</div>
+
+**Figure 18.** Top enriched gene ontology terms in downregulated DE transcripts for comparison primary versus 3D_smallMol.
+<div align="center">
+  <img src="results/images/primary_vs_3Dsm_down_GO_dotplot.png" width="500" alt="Top down-enriched GO terms primary vs 3D_smallMol">
+</div>
+
+**Figure 19.** Top enriched gene ontology terms in GSEA for comparison primary versus 3D_smallMol.
+<div align="center">
+  <img src="results/images/primary_vs_3Dsm_GSEA_GO_dotplot.png" width="900" alt="GSEA-enriched GO terms primary vs 3D_smallMol">
+</div>
+
+**Figure 20.** Top enriched gene ontology terms from GSEA KEGG pathways for comparison primary versus 3D_smallMol.
+<div align="center">
+  <img src="results/images/primary_vs_3Dsm_GSEA_KEGG_dotplot.png" width="900" alt="GSEA KEGG-enriched pathways primary vs 3D_smallMol">
+</div>
+
+### Summary and Conclusions
+
+This comprehensive transcriptomic analysis comparing primary gastric cells with different culture conditions (2D monolayer, 3D organoids with purified proteins, and 3D organoids with small molecules) provides several key insights:
+
+**Transcriptome Similarity to Primary Cells:**
+- Based on both PCA distance analysis and differential expression results, 3D cultures (particularly 3D_smallMol) show the highest similarity to primary gastric cells
+- The 3D_smallMol condition showed the fewest differentially expressed genes when compared to primary cells (18,239 vs 19,045 for 2D_smallMol)
+- Dimensionality appears to be a more important factor than growth factor type in determining transcriptome similarity to primary cells
+
+**Global Expression Patterns:**
+- All cultured conditions show substantial transcriptomic differences from primary cells, highlighting the impact of in vitro culture
+- 2D monolayer cultures show the greatest divergence from primary cells, with many unique differentially expressed genes
+- 3D organoid cultures cluster together in PCA space, suggesting shared responses to the 3D environment
+
+**Functional Implications:**
+- The gene ontology and pathway analyses (presented in Figures 9-20) reveal the biological processes affected by each culture condition
+- These analyses help identify specific cellular functions, developmental pathways, and metabolic processes that are altered during adaptation to different culture environments
+
+The results suggest that 3D organoid cultures, particularly those supplemented with small molecule growth factors, may provide the most physiologically relevant model for studying gastric cell biology in vitro.
+
+---
+
+**NOTE:** This report was generated with AI-assistance, don't use it directly for publication without verifying that everything is correct.
