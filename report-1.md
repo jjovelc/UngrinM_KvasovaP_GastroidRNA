@@ -175,7 +175,7 @@ The UpSet plot analysis reveals important insights into the overlap of different
 
 Functional interpretation of differentially expressed transcripts was performed using gene set enrichment analysis (GSEA) and over-representation analysis (ORA) to identify biological processes and pathways affected by the different culture conditions. These analyses help understand the biological significance of the observed expression changes beyond individual gene-level differences.
 
-The following analyses were conducted using the R package ClusterProfiler:
+The following analyses were conducted using the R package [ClusterProfiler](https://pubmed.ncbi.nlm.nih.gov/34557778/):
 
 1. **Over-representation Analysis (ORA)**: Traditional enrichment analysis was performed on upregulated and downregulated gene sets separately using enriched GO terms (Biological Process) and KEGG pathways. Only significantly differentially expressed genes (padj < 0.05 and |log2FC| ≥ 1) were included in these analyses.
 
