@@ -210,12 +210,12 @@ Hereafter the top differentially enriched or depleted features in each compariso
 
 **Figure 8.** Top enriched gene ontology terms in upregulated DE transcripts for comparison primary versus 2D_smallMol. 
 <div align="center">
-  <img src="results/images/primary_vs_2D_up_GO_dotplot.png" width="350" alt="Top up-enriched GO terms">
+  <img src="results/images/primary_vs_2D_up_GO_dotplot.png" width="500" alt="Top up-enriched GO terms">
 </div>
 
 **Figure 9.** Top enriched gene ontology terms in downregulated DE transcripts for comparison primary versus 2D_smallMol. 
 <div align="center">
-  <img src="results/images/primary_vs_2D_down_GO_dotplot.png" width="350" alt="Top up-enriched GO terms">
+  <img src="results/images/primary_vs_2D_down_GO_dotplot.png" width="500" alt="Top up-enriched GO terms">
 </div>
 
 
