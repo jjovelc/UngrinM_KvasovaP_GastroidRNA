@@ -218,4 +218,7 @@ Hereafter the top differentially enriched or depleted features in each compariso
   <img src="results/images/primary_vs_2D_down_GO_dotplot.png" width="500" alt="Top up-enriched GO terms">
 </div>
 
-
+**Figure 10.** Top enriched gene ontology terms in GSEA for comparison primary versus 2D_smallMol.
+<div align="center">
+  <img src="results/images/primary_vs_2D_GSEA_GO_dotplot.png" width="900" alt="GSEA-enriched GO terms">
+</div>
